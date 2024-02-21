@@ -1,6 +1,6 @@
 # LexiClean
 
-LexiClean is a Python package for preprocessing text data, designed to simplify and streamline the text cleaning process for natural language processing (NLP) projects.
+LexiClean is a Python package for preprocessing text data, designed to simplify the text-cleaning process for natural language processing (NLP) projects.
 
 ## Features
 
@@ -28,11 +28,70 @@ pip install lexiclean
 
 
 ## Usage
+
+#### Importing the module python
 ```bash
 from lexiclean import LexiClean
-
-# Initialize TextCleaner
+```
+#### Initializing the LexiClean object
+```bash
 cleaner = LexiClean()
+```
+#### Preprocessing a single text
+```bash
+text = "This is an example text for preprocessing."
+cleaned_text = cleaner.preprocess_text(text)
+print(cleaned_text)
+```
+```bash
+text = "This is an example text for preprocessing."
+cleaned_text = cleaner._preprocess_single_text(text)
+print(cleaned_text)
+```
+#### Preprocessing a DataFrame
+
+```bash
+import pandas as pd
+
+# Create a sample DataFrame
+data = {
+    'text_column': ["This is an example text.", "Another example text with numbers: 12345."]
+}
+df = pd.DataFrame(data)
+
+# Preprocess text column in the DataFrame
+cleaned_df = cleaner.preprocess_text(df, columns=['text_column'])
+print(cleaned_df)
+```
+```bash
+import pandas as pd
+
+# Create a sample DataFrame
+data = {
+    'text_column': ["This is an example text.", "Another example text with numbers: 12345."]
+}
+df = pd.DataFrame(data)
+
+# Preprocess text column in the DataFrame
+cleaned_df = cleaner._preprocess_dataframe(df, columns=['text_column'])
+print(cleaned_df)
+```
+### Customizing preprocessing steps
+You can customize the preprocessing steps by passing a dictionary of parameters to the preprocess_text method. Available parameters include:
+
+* clean_html_text.
+* remove_urls
+* remove_punctuation
+* remove_emojis
+* remove_foreign_letters
+* remove_numbers
+* lowercasing
+* remove_white_spaces
+* remove_repeated_characters
+* tokenize
+* remove_stopwords
+* stemming
+* handle_missing_values
 
 # Example usage
 text = "This is an example text with <html> tags and URLs: https://example.com."

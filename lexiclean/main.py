@@ -372,21 +372,24 @@ class LexiClean:
             data (str or DataFrame): The text or DataFrame containing the text columns to be preprocessed.
             columns (list, optional): List of column names in the DataFrame. Defaults to None.
             params (dict, optional): Parameters controlling text preprocessing steps. Defaults to None.
+            Available parameters:
+            - clean_html_text: bool (default True)
+            - remove_urls: bool (default True)
+            - remove_punctuation: bool (default True)
+            - remove_emojis: bool (default True)
+            - remove_foreign_letters: bool (default True)
+            - remove_numbers: bool (default True)
+            - lowercasing: bool (default True)
+            - remove_white_spaces: bool (default True)
+            - remove_repeated_characters: bool (default True)
+            - tokenize: bool (default True)
+            - remove_stopwords: bool (default True)
+            - stemming: bool (default True)
             join (bool): Whether to join tokens into a single string after preprocessing. Defaults to False.
 
         Returns:
             str or DataFrame: The preprocessed text or DataFrame.
         """
-
-        if params is None:
-            params = cls.methods.copy()  # Create a copy of cls.methods
-        else:
-            params_user = params
-            params = cls.methods.copy()  # Create a copy of cls.methods
-            for key, value in params_user.items():
-                if key in params:
-                    params[key] = value
-
         if isinstance(data, str):
             # If data is a single text
             preprocessed_data = cls._preprocess_single_text(data, params, join)
@@ -399,58 +402,98 @@ class LexiClean:
         return preprocessed_data
 
     @classmethod
-    def _preprocess_single_text(cls, text, params, join=False):
+    def _preprocess_single_text(cls, text, params=None, join=False):
         """
          Preprocess a single text.
 
          Args:
             text (str): The text to be preprocessed.
             params (dict): Parameters controlling text preprocessing steps.
+             Available parameters:
+            - clean_html_text: bool (default True)
+            - remove_urls: bool (default True)
+            - remove_punctuation: bool (default True)
+            - remove_emojis: bool (default True)
+            - remove_foreign_letters: bool (default True)
+            - remove_numbers: bool (default True)
+            - lowercasing: bool (default True)
+            - remove_white_spaces: bool (default True)
+            - remove_repeated_characters: bool (default True)
+            - tokenize: bool (default True)
+            - remove_stopwords: bool (default True)
+            - stemming: bool (default True)
             join (bool): Whether to join tokens into a single string after preprocessing. Defaults to False.
 
          Returns:
             str or list: The preprocessed text.
         """
-        cleaned_text = None
-        preprocessed_text = text
+        if not isinstance(text, str):
+            raise ValueError("Invalid input. Please provide either a single text")
 
-        if params.get("clean_html_text"):
-            preprocessed_text = cls.clean_html_text(preprocessed_text)
-        if params.get("remove_urls"):
-            preprocessed_text = cls.remove_urls(preprocessed_text)
-        if params.get("remove_punctuation"):
-            preprocessed_text = cls.remove_punctuation(preprocessed_text)
-        if params.get("remove_emojis"):
-            preprocessed_text = cls.remove_emojis(preprocessed_text)
-        if params.get("remove_foreign_letters"):
-            preprocessed_text = cls.remove_foreign_letters(preprocessed_text)
-        if params.get("remove_numbers"):
-            preprocessed_text = cls.remove_numbers(preprocessed_text)
-        if params.get("lowercasing"):
-            preprocessed_text = cls.lowercasing(preprocessed_text)
-        if params.get("remove_white_spaces"):
-            preprocessed_text = cls.remove_white_spaces(preprocessed_text)
-        if params.get("remove_repeated_characters"):
-            preprocessed_text = cls.remove_repeated_characters(preprocessed_text)
-        if params.get("tokenize"):
-            tokens = cls.tokenize(preprocessed_text)
-            if params.get("remove_stopwords"):
-                tokens = cls.remove_stopwords(tokens)
-            if params.get("stemming"):
-                tokens = cls.stemming(tokens)
-            if join:
-                cleaned_text = " ".join(tokens)
-            else:
-                cleaned_text = tokens
+        if params is None:
+            params = cls.methods.copy()
         else:
-            print("Attention to remove_stopwords and stemming make sure tokenize = true.")
+            true_params = {key: value for key, value in params.items() if value is True}
+            false_params = {key: value for key, value in params.items() if value is False}
+            if true_params and false_params:
+                raise ValueError("Invalid input. Cannot specify both True and False values for the same parameter.")
+            if not true_params and false_params:
+                params_user = params.copy()
+                params = cls.methods.copy()
+                for key, value in params_user.items():
+                    if key in params:
+                        params[key] = value
+            if true_params and not false_params:
+                params = params.copy()
+
+
+
+        preprocessed_text = text
+        cleaned_text = None
+        for key, value in params.items():
+            if key == "tokenize" and not value:
+                print("Attention to remove_stopwords and stemming make sure tokenize = true.")
+            if value:
+                if key == "clean_html_text":
+                    preprocessed_text = cls.clean_html_text(preprocessed_text)
+                elif key == "remove_urls":
+                    preprocessed_text = cls.remove_urls(preprocessed_text)
+                elif key == "remove_punctuation":
+                    preprocessed_text = cls.remove_punctuation(preprocessed_text)
+                elif key == "remove_emojis":
+                    preprocessed_text = cls.remove_emojis(preprocessed_text)
+                elif key == "remove_foreign_letters":
+                    preprocessed_text = cls.remove_foreign_letters(preprocessed_text)
+                elif key == "remove_numbers":
+                    preprocessed_text = cls.remove_numbers(preprocessed_text)
+                elif key == "lowercasing":
+                    preprocessed_text = cls.lowercasing(preprocessed_text)
+                elif key == "remove_white_spaces":
+                    preprocessed_text = cls.remove_white_spaces(preprocessed_text)
+                elif key == "remove_repeated_characters":
+                    preprocessed_text = cls.remove_repeated_characters(preprocessed_text)
+                elif key == "tokenize":
+                    tokens = cls.tokenize(preprocessed_text)
+                    if params.get("remove_stopwords"):
+                        tokens = cls.remove_stopwords(tokens)
+                    if params.get("stemming"):
+                        tokens = cls.stemming(tokens)
+                    if join:
+                        cleaned_text = " ".join(tokens)
+                    else:
+                        cleaned_text = tokens
+                    break  # Stop further processing if tokenize is True
+                else:
+                    print(f"Unknown parameter: {key}")
+
+        if cleaned_text is None:
             cleaned_text = preprocessed_text
 
-        print("Operation successful.")
+
         return cleaned_text
 
     @classmethod
-    def _preprocess_dataframe(cls, df, columns, params, join=False):
+    def _preprocess_dataframe(cls, df, columns=None, params=None, join=False):
         """
         Preprocess DataFrame columns containing text.
 
@@ -458,11 +501,28 @@ class LexiClean:
             df (DataFrame): The DataFrame containing text columns to be preprocessed.
             columns (list): List of column names in the DataFrame.
             params (dict): Parameters controlling text preprocessing steps.
+            Available parameters:
+            - clean_html_text: bool (default True)
+            - remove_urls: bool (default True)
+            - remove_punctuation: bool (default True)
+            - remove_emojis: bool (default True)
+            - remove_foreign_letters: bool (default True)
+            - remove_numbers: bool (default True)
+            - lowercasing: bool (default True)
+            - remove_white_spaces: bool (default True)
+            - remove_repeated_characters: bool (default True)
+            - tokenize: bool (default True)
+            - remove_stopwords: bool (default True)
+            - stemming: bool (default True)
             join (bool): Whether to join tokens into a single string after preprocessing. Defaults to False.
 
         Returns:
             DataFrame: The DataFrame with preprocessed text columns.
         """
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError("Invalid input. Please provide either  a DataFrame with column names.")
+        if columns is None:
+            raise ValueError("Invalid columns")
         df_copy = df.copy()
         df_copy = cls.handle_missing_values(df_copy, columns)
         # Calculate total number of rows to preprocess
