@@ -1,6 +1,6 @@
-# TextCleaner
+# LexiClean
 
-TextCleaner is a Python package for preprocessing text data, designed to simplify and streamline the text cleaning process for natural language processing (NLP) projects.
+LexiClean is a Python package for preprocessing text data, designed to simplify and streamline the text cleaning process for natural language processing (NLP) projects.
 
 ## Features
 
@@ -20,19 +20,19 @@ TextCleaner is a Python package for preprocessing text data, designed to simplif
 
 ## Installation
 
-You can install TextCleaner via pip:
+You can install LexiClean via pip:
 
 ```bash
-pip install textcleaner 
+pip install lexiclean 
 ```
 
 
 ## Usage
 ```bash
-from textcleaner import TextCleaner
+from lexiclean import LexiClean
 
 # Initialize TextCleaner
-cleaner = TextCleaner()
+cleaner = LexiClean()
 
 # Example usage
 text = "This is an example text with <html> tags and URLs: https://example.com."
