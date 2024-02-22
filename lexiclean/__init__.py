@@ -1,1 +1,1 @@
-from .main import LexiClean
+from .lexiclean import *
