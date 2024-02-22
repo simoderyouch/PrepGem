@@ -469,47 +469,8 @@ def stemming(data, columns=None):
         raise ValueError("Invalid input. Please provide either a list of tokens or a DataFrame with column names.")
 
 
-def preprocess_text(data, columns=None, params=None, join=False, missing_values=False):
-    """
-    Preprocess text data, handling both DataFrame and single text inputs.
 
-    Args:
-        data (str or DataFrame): The text or DataFrame containing the text columns to be preprocessed.
-        columns (list, optional): List of column names in the DataFrame. Defaults to None.
-        params (dict, optional): Parameters controlling text preprocessing steps. Defaults to None.
-        Available parameters:
-        - clean_html_text: bool (default True)
-        - remove_urls: bool (default True)
-        - remove_punctuation: bool (default True)
-        - remove_emojis: bool (default True)
-        - remove_foreign_letters: bool (default True)
-        - remove_numbers: bool (default True)
-        - lowercasing: bool (default True)
-        - remove_white_spaces: bool (default True)
-        - remove_repeated_characters: bool (default True)
-        - tokenize: bool (default True)
-        - remove_stopwords: bool (default True)
-        - stemming: bool (default True)
-        join (bool): Whether to join tokens into a single string after preprocessing. Defaults to False.
-        missing_values (bool): Whether to handle missing values  before preprocessing. Defaults to False.
-
-
-    Returns:
-        str or DataFrame: The preprocessed text or DataFrame.
-    """
-    if isinstance(data, str):
-        # If data is a single text
-        preprocessed_data = _preprocess_single_text(data, params, join)
-    elif isinstance(data, pd.DataFrame):
-        # If data is a DataFrame
-        preprocessed_data = _preprocess_dataframe(data, columns, params, join, missing_values)
-    else:
-        raise ValueError("Invalid input. Please provide either a single text or a DataFrame.")
-
-    return preprocessed_data
-
-
-def _preprocess_single_text(text, params=None, join=False):
+def preprocess_single_text(text, params=None, join=False):
     """
      Preprocess a single text.
 
@@ -603,7 +564,7 @@ def _preprocess_single_text(text, params=None, join=False):
     return cleaned_text
 
 
-def _preprocess_dataframe( df, columns=None, params=None, join=False, missing_values=False):
+def preprocess_dataframe(df, columns=None, params=None, join=False, missing_values=False):
     """
     Preprocess DataFrame columns containing text.
 
@@ -647,7 +608,7 @@ def _preprocess_dataframe( df, columns=None, params=None, join=False, missing_va
     for col in columns:
         for index, row in df_copy.iterrows():
             # Apply text preprocessing to each row in the specified column
-            df_copy.at[index, col] = _preprocess_single_text(row[col], params, join)
+            df_copy.at[index, col] = preprocess_single_text(row[col], params, join)
 
             clear_output(wait=True)
             # Update progress bar for each row processed
@@ -657,3 +618,43 @@ def _preprocess_dataframe( df, columns=None, params=None, join=False, missing_va
     pbar.close()
     print("Operation successful.")
     return df_copy
+
+def preprocess_text(data, columns=None, params=None, join=False, missing_values=False):
+    """
+    Preprocess text data, handling both DataFrame and single text inputs.
+
+    Args:
+        data (str or DataFrame): The text or DataFrame containing the text columns to be preprocessed.
+        columns (list, optional): List of column names in the DataFrame. Defaults to None.
+        params (dict, optional): Parameters controlling text preprocessing steps. Defaults to None.
+        Available parameters:
+        - clean_html_text: bool (default True)
+        - remove_urls: bool (default True)
+        - remove_punctuation: bool (default True)
+        - remove_emojis: bool (default True)
+        - remove_foreign_letters: bool (default True)
+        - remove_numbers: bool (default True)
+        - lowercasing: bool (default True)
+        - remove_white_spaces: bool (default True)
+        - remove_repeated_characters: bool (default True)
+        - tokenize: bool (default True)
+        - remove_stopwords: bool (default True)
+        - stemming: bool (default True)
+        join (bool): Whether to join tokens into a single string after preprocessing. Defaults to False.
+        missing_values (bool): Whether to handle missing values  before preprocessing. Defaults to False.
+
+
+    Returns:
+        str or DataFrame: The preprocessed text or DataFrame.
+    """
+    if isinstance(data, str):
+        # If data is a single text
+        preprocessed_data = preprocess_single_text(data, params, join)
+    elif isinstance(data, pd.DataFrame):
+        # If data is a DataFrame
+        preprocessed_data = preprocess_dataframe(data, columns, params, join, missing_values)
+    else:
+        raise ValueError("Invalid input. Please provide either a single text or a DataFrame.")
+
+    return preprocessed_data
+
