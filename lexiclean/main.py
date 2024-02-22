@@ -2,15 +2,20 @@ import re
 import string
 import logging
 from tqdm import tqdm
+from textblob import TextBlob
+import pandas as pd
 from IPython.display import clear_output
 import nltk
-import pandas as pd
+
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
 nltk.download('stopwords', quiet=True)
 nltk.download('wordnet', quiet=True)
 nltk.download('punkt', quiet=True)
+from nltk.corpus import words
+# Download the words corpus if not already downloaded
+nltk.download('words',quiet=True)
 
 
 class LexiClean:
@@ -21,6 +26,8 @@ class LexiClean:
         "remove_foreign_letters": True,
         "remove_numbers": True,
         "lowercasing": True,
+        "remove_nonsense_words" : False,
+        "spell_check_text": True,
         "remove_punctuation": True,
         "remove_white_spaces": True,
         "remove_repeated_characters": True,
@@ -28,6 +35,8 @@ class LexiClean:
         "remove_stopwords": True,
         "stemming": True,
         "handle_missing_values": True,
+
+
     }
 
     def __init__(self):
@@ -57,6 +66,69 @@ class LexiClean:
         print("Drop operation successful.")
 
         return df_copy
+
+    @staticmethod
+    def remove_nonsense_words(data, columns=None):
+        """
+           Remove nonsense words from either a single text or DataFrame columns.
+
+           Args:
+               data (str or DataFrame): The text or DataFrame containing text columns to be processed.
+               columns (list): List of column names in the DataFrame. Required if 'data' is a DataFrame.
+
+           Returns:
+               str or DataFrame: The processed text or DataFrame with columns containing removed nonsense words.
+
+           Raises:
+               ValueError: If the input is not a single text or a DataFrame with column names provided.
+           """
+        english_words = set(words.words())
+        words_list = nltk.word_tokenize(data.lower())
+
+        if isinstance(data, str):
+            filtered_words = [word for word in words_list if word in english_words]
+
+            return ' '.join(filtered_words)
+        elif isinstance(data, pd.DataFrame) and columns:
+            # If input is a DataFrame and columns are specified
+            df = data.copy()
+            for column in columns:
+                df[column] = df[column].apply(lambda x: ' '.join(
+                    [word for word in nltk.word_tokenize(x.lower()) if
+                     word in english_words]))
+            return df
+        else:
+            raise ValueError("Invalid input. Please provide either a single text or a DataFrame with column names.")
+
+    @staticmethod
+    def spell_check_text(data, columns=None):
+        """
+        Perform spell-checking on either a single text or a DataFrame with text columns.
+
+        Args:
+            data (str or DataFrame): The text or DataFrame containing text columns to be spell-checked.
+            columns (list): List of column names in which missing values are to be handled.
+        Returns:
+            str or DataFrame: The text or DataFrame with spell-checked text columns.
+        """
+
+        if isinstance(data, str):
+
+            cleaned_text = LexiClean.remove_nonsense_words(data)
+            words_list = nltk.word_tokenize(cleaned_text.lower())
+            corrected_words = [str(TextBlob(word).correct()) for word in words_list]
+            # Reconstruct the text with corrected words
+            return ' '.join(corrected_words)
+        elif isinstance(data, pd.DataFrame) and columns:
+
+            df = data.copy()
+            for column in columns:
+
+                df[column] = df[column].apply(lambda x: ' '.join(
+                    [str(TextBlob(word).correct()) for word in nltk.word_tokenize(LexiClean.remove_nonsense_words(x))]))
+            return df
+        else:
+            raise ValueError("Invalid input. Please provide either a single text or a DataFrame with column names.")
 
     @staticmethod
     def clean_html_text(data, columns=None):
@@ -100,7 +172,8 @@ class LexiClean:
             """
         if isinstance(data, str):
 
-            clean_text = re.sub(r'http\S+', '', data)
+            clean_text = re.sub(r'\b(?:https?://)?(?:www\.)?(?:\S+\.)+(?:com|ma|org|net|edu|gov|info)\b', '', data)
+
             return clean_text
         elif isinstance(data, pd.DataFrame) and columns:
 
@@ -460,6 +533,10 @@ class LexiClean:
                     preprocessed_text = cls.remove_urls(preprocessed_text)
                 elif key == "remove_punctuation":
                     preprocessed_text = cls.remove_punctuation(preprocessed_text)
+                elif key == "spell_check_text":
+                    preprocessed_text = cls.spell_check_text(preprocessed_text)
+                elif key == "remove_nonsense_words":
+                    preprocessed_text = cls.remove_nonsense_words(preprocessed_text)
                 elif key == "remove_emojis":
                     preprocessed_text = cls.remove_emojis(preprocessed_text)
                 elif key == "remove_foreign_letters":
@@ -505,6 +582,8 @@ class LexiClean:
             - clean_html_text: bool (default True)
             - remove_urls: bool (default True)
             - remove_punctuation: bool (default True)
+            - spell_check_text: bool (default True)
+            - remove_nonsense_words: bool (default False)
             - remove_emojis: bool (default True)
             - remove_foreign_letters: bool (default True)
             - remove_numbers: bool (default True)
