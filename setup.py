@@ -16,7 +16,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name='LexiClean',
-    version='1.0.2',
+    version='1.0.3',
     author='Mohamed Edderyouch',
     author_email='mohamededderyouch5@gmail.com',
     license='Academic Free License',

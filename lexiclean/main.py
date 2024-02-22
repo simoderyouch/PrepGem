@@ -13,9 +13,9 @@ from nltk.stem import PorterStemmer
 nltk.download('stopwords', quiet=True)
 nltk.download('wordnet', quiet=True)
 nltk.download('punkt', quiet=True)
-from nltk.corpus import words
-# Download the words corpus if not already downloaded
-nltk.download('words',quiet=True)
+nltk.download('brown', quiet=True)
+from nltk.corpus import wordnet
+from nltk.corpus import brown
 
 
 class LexiClean:
@@ -27,10 +27,11 @@ class LexiClean:
         "remove_numbers": True,
         "lowercasing": True,
         "remove_nonsense_words" : False,
-        "spell_check_text": True,
+        "spell_corrector": False,
         "remove_punctuation": True,
         "remove_white_spaces": True,
         "remove_repeated_characters": True,
+        "nosense_words_and_spell_check":True,
         "tokenize": True,
         "remove_stopwords": True,
         "stemming": True,
@@ -82,11 +83,14 @@ class LexiClean:
            Raises:
                ValueError: If the input is not a single text or a DataFrame with column names provided.
            """
-        english_words = set(words.words())
-        words_list = nltk.word_tokenize(data.lower())
+
+        #english_words = [word.lower() for word in wordnet.words()]
+        english_words = set(w.lower() for w in brown.words())
 
         if isinstance(data, str):
-            filtered_words = [word for word in words_list if word in english_words]
+            words_list = nltk.wordpunct_tokenize(data.lower())
+
+            filtered_words = [word for word in words_list if word in english_words or not word.isalpha()]
 
             return ' '.join(filtered_words)
         elif isinstance(data, pd.DataFrame) and columns:
@@ -94,14 +98,14 @@ class LexiClean:
             df = data.copy()
             for column in columns:
                 df[column] = df[column].apply(lambda x: ' '.join(
-                    [word for word in nltk.word_tokenize(x.lower()) if
-                     word in english_words]))
+                    [word for word in nltk.wordpunct_tokenize(x.lower()) if
+                     word in english_words or not word.isalpha()]))
             return df
         else:
             raise ValueError("Invalid input. Please provide either a single text or a DataFrame with column names.")
 
     @staticmethod
-    def spell_check_text(data, columns=None):
+    def spell_corrector(data, columns=None):
         """
         Perform spell-checking on either a single text or a DataFrame with text columns.
 
@@ -113,19 +117,41 @@ class LexiClean:
         """
 
         if isinstance(data, str):
-
-            cleaned_text = LexiClean.remove_nonsense_words(data)
-            words_list = nltk.word_tokenize(cleaned_text.lower())
+            words_list = nltk.word_tokenize(data.lower())
             corrected_words = [str(TextBlob(word).correct()) for word in words_list]
-            # Reconstruct the text with corrected words
             return ' '.join(corrected_words)
         elif isinstance(data, pd.DataFrame) and columns:
 
             df = data.copy()
             for column in columns:
+                df[column] = df[column].apply(lambda x:  ' '.join([str(TextBlob(word).correct()) for word in nltk.word_tokenize(x.lower())]))
+            return df
+        else:
+            raise ValueError("Invalid input. Please provide either a single text or a DataFrame with column names.")
 
-                df[column] = df[column].apply(lambda x: ' '.join(
-                    [str(TextBlob(word).correct()) for word in nltk.word_tokenize(LexiClean.remove_nonsense_words(x))]))
+    @staticmethod
+    def nosense_words_and_spell_check(data, columns=None):
+        """
+    Perform spell-checking on either a single text or a DataFrame with text columns,
+    and remove nonsense words.
+
+    Args:
+        data (str or DataFrame): The text or DataFrame containing text columns to be spell-checked
+                                 and cleaned from nonsense words.
+        columns (list): List of column names in which missing values are to be handled.
+
+    Returns:
+        str or DataFrame: The text or DataFrame with spell-checked text columns and removed nonsense words.
+    """
+
+        if isinstance(data, str):
+            corrected_words = LexiClean.spell_corrector(data)
+            cleaned_text = LexiClean.remove_nonsense_words(corrected_words)
+            return cleaned_text
+        elif isinstance(data, pd.DataFrame) and columns:
+            df = data.copy()
+            for column in columns:
+                df[column] = df[column].apply(lambda x: LexiClean.remove_nonsense_words(LexiClean.spell_corrector(x)))
             return df
         else:
             raise ValueError("Invalid input. Please provide either a single text or a DataFrame with column names.")
@@ -533,10 +559,6 @@ class LexiClean:
                     preprocessed_text = cls.remove_urls(preprocessed_text)
                 elif key == "remove_punctuation":
                     preprocessed_text = cls.remove_punctuation(preprocessed_text)
-                elif key == "spell_check_text":
-                    preprocessed_text = cls.spell_check_text(preprocessed_text)
-                elif key == "remove_nonsense_words":
-                    preprocessed_text = cls.remove_nonsense_words(preprocessed_text)
                 elif key == "remove_emojis":
                     preprocessed_text = cls.remove_emojis(preprocessed_text)
                 elif key == "remove_foreign_letters":
@@ -549,6 +571,8 @@ class LexiClean:
                     preprocessed_text = cls.remove_white_spaces(preprocessed_text)
                 elif key == "remove_repeated_characters":
                     preprocessed_text = cls.remove_repeated_characters(preprocessed_text)
+                elif key == "nosense_words_and_spell_check":
+                    preprocessed_text = cls.nosense_words_and_spell_check(preprocessed_text)
                 elif key == "tokenize":
                     tokens = cls.tokenize(preprocessed_text)
                     if params.get("remove_stopwords"):
