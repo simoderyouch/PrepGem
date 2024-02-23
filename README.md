@@ -93,7 +93,7 @@ print(cleaned_text)
 ```
 
 ### Custom preprocessing pipeline
-You can customize the preprocessing steps by passing a dictionary of parameters with value of True to the preprocess_text method. Available parameters include:
+You can customize the preprocessing steps by passing a list of parameters  to the preprocess_text method. Available parameters include:
 
 * clean_html_text.
 * remove_urls
@@ -116,16 +116,16 @@ You can customize the preprocessing steps by passing a dictionary of parameters 
 ##### Example usage
 ```bash
 text = "This is an example text with <html> tags and URLs: https://example.com."
-cleaned_text = lexiclean.preprocess_text(text, params={"clean_html_text": True, "remove_urls": True, "remove_punctuation": True})
+cleaned_text = lexiclean.preprocess_text(text, pipeline=["clean_html_text","nosense_words_and_spell_check"])
 print(cleaned_text)
 
 ```
-You can customize the preprocessing steps by passing a dictionary of parameters with value of False to the preprocess_text method to remove a step. Available parameters include:
+You can customize the preprocessing steps by passing a  parameter remove with value of True remove=True to the preprocess_text method to remove a step. Available parameters include:
 
 ##### Example usage
 ```bash
 text = "This is an example text with <html> tags and URLs: https://example.com."
-cleaned_text = lexiclean.preprocess_text(text, params={"clean_html_text": False, "remove_urls": False, "remove_punctuation": False})
+cleaned_text = lexiclean.preprocess_text(text, pipeline=["clean_html_text"], remove=True)
 print(cleaned_text)
 ```
 
