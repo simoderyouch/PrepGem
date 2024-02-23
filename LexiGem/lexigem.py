@@ -54,7 +54,8 @@ def preprocess_single_text(text, pipeline=None,remove=False , join=False):
         str or list: The preprocessed text.
     """
     if not isinstance(text, str):
-        raise ValueError("Invalid input. Please provide either a single text")
+        print(text)
+        raise ValueError("Invalid input. Please provide either a single text or you provide null value")
 
     pipeline_to_use  = []
     if pipeline is None:
@@ -94,7 +95,7 @@ def preprocess_single_text(text, pipeline=None,remove=False , join=False):
 
     return cleaned_text
 
-def preprocess_dataframe(df, columns=None, pipeline=None,remove=False, join=False, missing_values=False):
+def preprocess_dataframe(df, columns=None, pipeline=None,remove=False, join=False, missing_values=True):
     """
     Preprocess DataFrame columns containing text.
 
@@ -131,7 +132,7 @@ def preprocess_dataframe(df, columns=None, pipeline=None,remove=False, join=Fals
     print("Operation successful.")
     return df_copy
 
-def preprocess_text(data, columns=None, pipeline=None,remove=False, join=False, missing_values=False):
+def preprocess_text(data, columns=None, pipeline=None,remove=False, join=False, missing_values=True):
     """
     Preprocess text data, handling both DataFrame and single text inputs.
 

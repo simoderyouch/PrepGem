@@ -59,6 +59,7 @@ def remove_nonsense_words(data, columns=None):
        """
 
     def preprocessing_function(x):
+
         return ' '.join(
             [word for word in nltk.wordpunct_tokenize(x.lower()) if word in english_words or not word.isalpha()])
     if isinstance(data, str):
@@ -130,6 +131,7 @@ def clean_html_text(data, columns=None):
         str or DataFrame: The cleaned text or DataFrame with the cleaned text column.
     """
     def preprocessing_function(x):
+
         return re.sub('<[^<]+?>', '', x)
     if isinstance(data, str):
         return preprocessing_function(data)
@@ -244,6 +246,7 @@ def remove_numbers(data, columns=None):
         str or DataFrame: The text with numbers removed or DataFrame with the specified columns cleaned.
     """
     def preprocessing_function(x):
+
         return re.sub(r'\d+', '', x)
 
     if isinstance(data, str):

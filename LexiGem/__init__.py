@@ -1,2 +1,2 @@
-from .lexiclean import *
+from .lexigem import *
 from .preprocessing import *
