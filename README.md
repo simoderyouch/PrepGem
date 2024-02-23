@@ -1,9 +1,9 @@
-# LexiGem
+# PrepGem
 
-LexiGem is a Python package for preprocessing text data, designed to simplify the text-cleaning process for natural language processing (NLP) projects.
+PrepGem is a Python package for preprocessing text data, designed to simplify the text-cleaning process for natural language processing (NLP) projects.
 
 ## Features
-LexiClean offers the following features:
+PrepGem offers the following features:
 
 - **Handle Missing Values**: Easily handle missing values in specified DataFrame columns.
 - **Clean HTML Text**: Remove HTML tags and special characters from text or DataFrame columns.
@@ -24,10 +24,10 @@ LexiClean offers the following features:
 
 ## Installation
 
-You can install LexiGem via pip:
+You can install PrepGem via pip:
 
 ```bash
-pip install LexiGem 
+pip install prepgem 
 ```
 
 
@@ -35,21 +35,21 @@ pip install LexiGem
 
 #### Importing the module python
 ```bash
-import lexigem 
+import prepgem 
 ```
 
 #### Basic Usage
 
 ```bash
 text = "This is an example text for preprocessing."
-cleaned_text = lexigem.preprocess_text(text)
+cleaned_text = prepgem.preprocess_text(text)
 print(cleaned_text)
 ```
 
 #### Preprocessing a single text
 ```bash
 text = "This is an example text for preprocessing."
-cleaned_text = lexigem.preprocess_single_text(text)
+cleaned_text = prepgem.preprocess_single_text(text)
 print(cleaned_text)
 ```
 
@@ -65,7 +65,7 @@ data = {
 df = pd.DataFrame(data)
 
 # Preprocess text column in the DataFrame
-cleaned_df = lexigem.preprocess_dataframe(df, columns=['text_column'])
+cleaned_df = prepgem.preprocess_dataframe(df, columns=['text_column'])
 print(cleaned_df)
 ```
 ### Default preprocessing pipeline
@@ -88,7 +88,7 @@ print(cleaned_df)
 
 ```bash
 text = "This is an example text with <html> tags and URLs: https://example.com."
-cleaned_text = lexigem.preprocess_text(text)
+cleaned_text = prepgem.preprocess_text(text)
 print(cleaned_text) 
 ```
 
@@ -116,7 +116,7 @@ You can customize the preprocessing steps by passing a list of parameters  to th
 ##### Example usage
 ```bash
 text = "This is an example text with <html> tags and URLs: https://example.com."
-cleaned_text = lexigem.preprocess_text(text, pipeline=["clean_html_text","nosense_words_and_spell_check"])
+cleaned_text = prepgem.preprocess_text(text, pipeline=["clean_html_text","nosense_words_and_spell_check"])
 print(cleaned_text)
 
 ```
@@ -125,13 +125,13 @@ You can customize the preprocessing steps by passing a  parameter remove with va
 ##### Example usage
 ```bash
 text = "This is an example text with <html> tags and URLs: https://example.com."
-cleaned_text = lexigem.preprocess_text(text, pipeline=["clean_html_text"], remove=True)
+cleaned_text = prepgem.preprocess_text(text, pipeline=["clean_html_text"], remove=True)
 print(cleaned_text)
 ```
 
 You can use all step as normal function just by passing The text or DataFrame containing the text column to be cleaned
 ```bash
-from LexiGem import remove_urls
+from prepgem import remove_urls
 
 # Example text with URLs
 text_with_urls = "This is an example text with URLs: https://example.com and http://www.example.org."

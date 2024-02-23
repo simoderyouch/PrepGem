@@ -1,2 +1,2 @@
-from .lexigem import *
+from .prepgem import *
 from .preprocessing import *
