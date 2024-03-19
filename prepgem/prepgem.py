@@ -1,6 +1,7 @@
 import pandas as pd
 from IPython.display import clear_output
 from tqdm import tqdm
+import threading
 from .utils import preprocess_cell
 from .preprocessing import handle_missing_values, clean_html_text, remove_urls, remove_punctuation, remove_emojis, remove_foreign_letters, \
     remove_numbers, lowercasing, remove_white_spaces, remove_repeated_characters, spell_corrector, \
@@ -41,58 +42,63 @@ preprocessing_functions = {
     "stemming": stemming
 }
 
-def preprocess_single_text(text, pipeline=None,remove=False , join=False):
+
+class PreprocessingThread(threading.Thread):
+    def __init__(self, target, args=(), kwargs={}):
+        super(PreprocessingThread, self).__init__()
+        self.target = target
+        self.args = args
+        self.kwargs = kwargs
+        self.result = None
+
+    def run(self):
+        self.result = self.target(*self.args, **self.kwargs)
+
+def preprocess_single_text(text, pipeline=None, remove=False, join=False, timeout=60):
     """
-     Preprocess a single text.
-     Args:
+    Preprocess a single text.
+    Args:
         text (str): The text to be preprocessed.
         pipeline (list): Parameters controlling text preprocessing steps.
-        remove (bool):  Make it True to define pipeline as Preprocessing steps to remove . Default False.
+        remove (bool):  Make it True to define pipeline as Preprocessing steps to remove. Default False.
         join (bool): Whether to join tokens into a single string after preprocessing. Defaults to False.
+        timeout (int): Timeout duration in seconds. Default is 60 seconds.
 
-     Returns:
+    Returns:
         str or list: The preprocessed text.
     """
     if not isinstance(text, str):
-        print(text)
-        raise ValueError("Invalid input. Please provide either a single text or you provide null value")
+        raise ValueError("Invalid input. Please provide a single text.")
 
-    pipeline_to_use  = []
-    if pipeline is None:
-        pipeline_to_use = preprocessing_pipeline
+    pipeline_to_use = pipeline if pipeline is not None else preprocessing_pipeline.copy()
+    if remove:
+        pipeline_to_use = [step for step in pipeline_to_use if step not in preprocessing_pipeline]
+
+    thread = PreprocessingThread(preprocess_single_text_internal, (text, pipeline_to_use, join))
+    thread.start()
+    thread.join(timeout)
+
+    if thread.is_alive():
+        print("Preprocessing timed out.")
+        return None
     else:
-       if remove:
-            pipeline_to_use = preprocessing_pipeline.copy()
-            for element_to_remove in pipeline:
-                if element_to_remove in pipeline_to_use:
-                    pipeline_to_use = [element for element in pipeline_to_use if element_to_remove != element]
-       else:
-           pipeline_to_use = pipeline
+        return thread.result
 
-
-
+def preprocess_single_text_internal(text, pipeline, join):
     preprocessed_text = text
-
-
-    for step in pipeline_to_use:
-        if step == "remove_stopwords" and ("tokenize" not in pipeline_to_use):
+    for step in pipeline:
+        if step == "remove_stopwords" and ("tokenize" not in pipeline):
             continue
-        elif step == "stemming" and ("tokenize" not in pipeline_to_use):
+        elif step == "stemming" and ("tokenize" not in pipeline):
             continue
         elif step in preprocessing_functions:
             preprocessed_text = preprocessing_functions[step](preprocessed_text)
         else:
             print(f"Unknown parameter: {step}")
-
-
-
-    if join and ("tokenize" in pipeline_to_use):
+    if join and ("tokenize" in pipeline):
         cleaned_text = " ".join(preprocessed_text)
     else:
         cleaned_text = preprocessed_text
-
-
-
     return cleaned_text
 
 def preprocess_dataframe(df, columns=None, pipeline=None,remove=False, join=False, missing_values=True):
