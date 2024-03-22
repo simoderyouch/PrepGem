@@ -19,7 +19,11 @@ from nltk.tokenize import TreebankWordTokenizer
 
 
 
-
+no_stopwords = ["not","don't",'aren','don','ain',"aren't", 'couldn', "couldn't", 'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'isn', "isn't",
+               'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't",
+               "won't", 'wouldn', "wouldn't"]
+for no_stopword in no_stopwords:
+    stop_words.remove(no_stopword)
 def handle_missing_values(df, columns):
     """
        Handle missing values in specified columns of a DataFrame by deleting rows with a number of missing values
@@ -304,27 +308,6 @@ def remove_white_spaces(data, columns=None):
 
 
 
-def remove_repeated_characters(data, columns=None):
-    """
-    Remove repeated characters in words from the text or DataFrame columns.
-
-    Args:
-        data (str or DataFrame): The text or DataFrame containing the text columns to be cleaned.
-        columns (list, optional): List of column names in the DataFrame. Defaults to None.
-
-    Returns:
-        str or DataFrame: The text with repeated characters in words removed or DataFrame with the specified columns cleaned.
-    """
-    def preprocessing_function(x):
-        return re.sub(r'(.)\1+', r'\1', x)
-
-    if isinstance(data, str):
-        return preprocessing_function(data)
-    elif isinstance(data, pd.DataFrame) and columns:
-
-        return preprocess_columns(data, columns, preprocessing_function, 'remove_repeated_characters')
-    else:
-        raise ValueError("Invalid input. Please provide either a single text or a DataFrame with column names.")
 
 
 
