@@ -16,7 +16,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name='PrepGem',
-    version='1.0.4',
+    version='1.0.5',
     author='Mohamed Edderyouch',
     author_email='mohamededderyouch5@gmail.com',
     maintainer= 'Zineb Boughedda',
