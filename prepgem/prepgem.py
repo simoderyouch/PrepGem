@@ -2,10 +2,7 @@ import pandas as pd
 from IPython.display import clear_output
 from tqdm import tqdm
 from .utils import preprocess_cell
-from .preprocessing import handle_missing_values, clean_html_text, remove_urls, remove_punctuation, remove_emojis, remove_foreign_letters, \
-    remove_numbers, lowercasing, remove_white_spaces, remove_repeated_characters, spell_corrector, \
-    remove_nonsense_words, nosense_words_and_spell_check, tokenize, remove_stopwords, stemming
-
+from .preprocessing import *
 preprocessing_pipeline = [
     "clean_html_text",
     "remove_urls",
@@ -15,8 +12,7 @@ preprocessing_pipeline = [
     "remove_numbers",
     "lowercasing",
     "remove_punctuation",
-    "remove_repeated_characters",
-    "nosense_words_and_spell_check",
+     "remove_nonsense_words",
     "remove_white_spaces",
     "tokenize",
     "remove_stopwords",
@@ -32,7 +28,7 @@ preprocessing_functions = {
     "remove_numbers": remove_numbers,
     "lowercasing": lowercasing,
     "remove_white_spaces": remove_white_spaces,
-    "remove_repeated_characters": remove_repeated_characters,
+
     "spell_corrector": spell_corrector,
     "remove_nonsense_words": remove_nonsense_words,
     "nosense_words_and_spell_check": nosense_words_and_spell_check,
